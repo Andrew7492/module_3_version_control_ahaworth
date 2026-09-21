@@ -102,3 +102,6 @@ knitr::kable(co2_by_decade)
 ## Quarto also supports citations to external sources.
 
 Atmospheric CO2 has been measured continuously at Mauna Loa since 1958, extending an ice-core record that reaches back hundreds of thousands of years [@barnola2003].
+
+## Git Practice
+This is a test change for Git
