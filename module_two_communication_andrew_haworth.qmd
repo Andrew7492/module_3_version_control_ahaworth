@@ -1,0 +1,104 @@
+---
+title: "module_two_communication_ahaworth"
+author: "Andrew Haworth"
+date: today
+format:
+  html: default
+  pdf: default
+  docx: default
+bibliography: references.bib
+keywords:
+- climate change
+- carbon dixide
+abstract: "This resport examines changes in gloabl warming"
+params:
+  station: "Mauna Loa"
+  start_year: 1990
+---
+
+Start to write text.
+
+- Global temperature anomaly (NASA GISTEMP)
+- Atmospheric CO~2~ concentration (Mauna Loa Observatory)
+- [Data source](https://climate.nasa.gov/vital-signs/)
+
+> CO2 concentration has risen every year on record since systematic measurement began.
+
+## Data
+Here are my data files
+
+## Results
+
+## Code chunks and inline code
+```{r}
+data_path <- "https://websites.umich.edu/~zhukai/env-data-sci/data"
+mauna_loa_co2 <- read.table(file.path(data_path, "climate", "mauna_loa_co2.txt"), skip = 42, header = FALSE, na.strings = c("-1", "-9.99", "-0.99"))
+colnames(mauna_loa_co2) <- c("year", "month", "decimal_date", "average", "interpolated", "n_day", "stdv_day", "uncertainty_month")
+```
+## Add the parameter R code
+
+```{r}
+report_station <- params$station
+report_start <- params$start_year
+
+subset(mauna_loa_co2, year >= report_start)
+```
+
+## Other options target specific kinds of output rather than the whole chunk: message: false and warning: false suppress messages and warnings, results: hide and fig-show: hide hide printed output and plots, and error: true lets rendering continue past a failing chunk instead of stopping the whole document.
+```{r}
+#| message: false
+#| warning: false
+
+# Summarize CO2 by decade for the report
+mauna_loa_co2$decade <- floor(mauna_loa_co2$year / 10) * 10
+aggregate(interpolated ~ decade, data = mauna_loa_co2, FUN = mean, na.rm = TRUE)
+```
+
+## Rather than repeating the same options on every chunk, we can set them once in the YAML header under execute to apply throughout the entire document.
+
+```{r}
+n_observations <- sum(!is.na(mauna_loa_co2$average))
+```
+There are `r n_observations` non-missing monthly CO2 observations.
+
+```{r}
+#| message: false
+
+library(tidyverse)
+```
+
+## Figures, tables and citations 9/16/2026
+```{r}
+mauna_loa_co2$Date <- as.Date(with(mauna_loa_co2, ISOdate(year, month, 1)))
+```
+
+```{r}
+#| label: fig-co2-trend
+#| fig-width: 6
+#| fig-height: 4
+#| fig-cap: "Monthly atmospheric CO2 concentration measured at Mauna Loa Observatory"
+#| fig-alt: "Line plot of CO2 concentration in parts per million against date, showing a steady long-term increase with a seasonal sawtooth pattern"
+#| out-width: "70%"
+
+ggplot(mauna_loa_co2, aes(x = Date, y = interpolated)) +
+  geom_line(color = "darkgreen") +
+  labs(x = "Date", y = "CO2 concentration (ppm)", title = "Atmospheric CO2 concentration") +
+  theme_minimal()
+```
+As shown in @fig-co2-trend, atmospheric CO2 has risen steadily since 1958.
+
+The complete source for the labeled table is:
+```{r}
+#| label: tbl-co2-decade
+#| tbl-cap: "Atmospheric CO2 concentration by decade"
+
+mauna_loa_co2$decade <- floor(mauna_loa_co2$year / 10) * 10
+co2_by_decade <- aggregate(interpolated ~ decade, data = mauna_loa_co2, FUN = mean, na.rm = TRUE)
+co2_by_decade$interpolated <- round(co2_by_decade$interpolated, 1)
+names(co2_by_decade) <- c("Decade", "Mean CO2 (ppm)")
+knitr::kable(co2_by_decade)
+```
+
+## Quarto also supports citations to external sources.
+
+Atmospheric CO2 has been measured continuously at Mauna Loa since 1958, extending an ice-core record that reaches back hundreds of thousands of years [@barnola2003].

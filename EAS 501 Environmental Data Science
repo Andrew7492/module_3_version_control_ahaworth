@@ -1,0 +1,32 @@
+---
+title: "module-one-visualization-and-eda-andrew-haworth"
+author: "Andrew Haworth"
+output: html_document
+date: "`r Sys.Date()`"
+---
+## Introduction
+
+data_path <- "https://websites.umich.edu/~zhukai/env-data-sci/data"
+
+## Grammar of graphics
+
+global_temp <- read.table(file.path(data_path, "climate", "global_temp.txt"), skip = 5, header = FALSE)
+colnames(global_temp) <- c("year", "no_smooth", "lowess")
+head(global_temp)
+
+plot(global_temp$year, global_temp$no_smooth, type = "p", col = "blue", pch = 16, xlab = "Year", ylab = "Temperature Anomaly (C)", main = "Global temperature change")
+lines(global_temp$year, global_temp$lowess, col = "red", lwd = 2)
+legend("topleft", legend = c("Raw data", "smoothed"), col = c("blue", "red"), lwd = 2, pch = c(16, NA), lty = c(NA, 1))
+
+mauna_loa_co2 <- read.table(file.path(data_path, "climate", "mauna_loa_co2.txt"), skip = 42, header = FALSE, na.strings = c("-1", "-9.99", "-0.99"))
+colnames(mauna_loa_co2) <- c("year", "month", "decimal_date", "average", "interpolated", "n_day", "stdv_day", "uncertainty_month")
+head(mauna_loa_co2)
+
+# Define the date column
+mauna_loa_co2$Date <- as.Date(with(mauna_loa_co2, ISOdate(year, month, 1)))
+
+# Basic plot
+plot(mauna_loa_co2$Date, mauna_loa_co2$interpolated, type = "l", col = "darkgreen", xlab = "Date", ylab = "CO2 concentration (ppm)", main = "CO2 change")
+lines(mauna_loa_co2$Date, mauna_loa_co2$average, col = "blue", lwd = 2)
+legend("topleft", legend = c("De-seasonalized data", "Seasonal data"), col = c("darkgreen", "blue"), lwd = 2)
+
